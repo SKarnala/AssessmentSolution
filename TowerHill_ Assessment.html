@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TowerHill ProgrammingProblem</title>
+    <style type="text/css">
+
+        body {
+            width: 100%
+            font-family: sans-serif;
+        }
+
+        .time-range-slots {
+            display: inline-block;
+            width: 110px;
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+
+        .days-events {
+            display: inline-block;
+            width: 620px;
+            padding: 0 10px;
+            margin: 0;
+            position: relative;
+            border-left: 1px solid grey;
+            height: 720px;
+            background-color: rgba(14, 13, 14, 0.05)
+        }
+
+        #ranges {
+            list-style: none;
+            display: block;
+            width: 100px;
+            padding: 0;
+            margin: 0;
+        }
+
+        #ranges li {
+            display: block;
+            color: rgba(14, 13, 14, 0.62);
+            font-weight: bold;
+            font-size: 16px;
+            text-align: right;
+
+        }
+
+        #ranges li > em {
+            color: #cecece;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        #ranges li:nth-child(odd) {
+            height: 30px;
+            line-height: 30px;
+        }
+
+        #ranges li:nth-child(even) {
+            color: #cecece;
+            font-size: 12px;
+            text-transform: uppercase;
+            height: 30px;
+            line-height: 30px;
+
+        }
+
+        #events{
+            list-style: none;
+            display: block;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            top: 0;
+            left: 0;
+        }
+        #events li {
+            display: inline-block;
+            position: absolute;
+            box-sizing: border-box;
+            background-color: #FFF;
+            border:1px solid lightgray;
+            border-left: 3px solid green;
+        }
+
+        #events li.half {
+            width: 50%;
+        }
+        #events li.full {
+            width: 100%;
+        }
+        #events li.left {
+            left: 0;
+        }
+        #events li.right {
+            left: 50%;
+        }
+
+        #events li .event-name{
+            display: block;
+            color: green;
+            font-size: 14px;
+            font-weight:bold;
+            padding: 5px;
+        }
+        #events li .event-location{
+            display: block;
+            color: grey;
+            font-size: 12px;
+            padding-left: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="days-layout">
+    <div class="time-range-slots">
+        <ul id="ranges"></ul>
+    </div>
+    <div class="days-events">
+        <ul id="events"></ul>
+    </div>
+
+</div>
+<script type="text/javascript">
+    const startTime = 9;
+    const endCount = 720;
+    const interval = 30;
+    const slots = [{start: 30, end: 150}, {start: 540, end: 600}, {start: 560, end: 620}, {start: 610, end: 670}];
+
+
+    function layoutTimeSlots() {
+        let timeRanges = document.querySelector("#ranges");
+        let timeFragments = document.createDocumentFragment();
+        let li;
+        for (let counter = 0; counter <= endCount;) {
+            if (counter % 60 === 0) {
+                li = document.createElement('li');
+                li.innerHTML = defineAMPM(counter, true)
+                timeFragments.appendChild(li);
+            } else {
+                li = document.createElement('li');
+                li.innerHTML = defineAMPM(counter, false)
+                timeFragments.appendChild(li);
+            }
+            counter = counter + interval;
+        }
+
+        timeRanges.appendChild(timeFragments);
+
+        layOutDay(slots);
+    }
+
+    function defineAMPM(counter, full) {
+        let time = startTime + Math.floor(counter / 60)
+        if (time > 12) {
+            time = (full) ? time % 12 + ":00 <em>PM</em>" : time % 12 + ':30';
+        } else if (time < 12) {
+            time = (full) ? time % 12 + ":00 <em>AM</em>" : time % 12 + ':30';
+        } else {
+            time = (full) ? time + ":00 <em>PM</em>" : time + ':30';
+        }
+        return time
+    }
+
+    function layOutDay(slots) {
+
+        let eventRanges = document.querySelector("#events");
+        eventRanges.innerHTML = '';
+        let eventFragments = document.createDocumentFragment();
+        let li, eventObj, prevObj, nextObj, prevNode;
+        for (let counter = 0; counter < slots.length; counter++) {
+            eventObj = slots[counter];
+            prevObj = slots[counter-1] || {};
+            nextObj = slots[counter+1] || {};
+            li = document.createElement('li');
+            li.style.height= eventObj.end - eventObj.start + "px";
+            li.style.top = eventObj.start + "px";
+
+            if((prevObj.end  && eventObj.start < prevObj.end) || (nextObj.start && eventObj.end > nextObj.start)){
+                li.className = "half";
+            }else{
+                li.className = "full";
+            }
+            let children = eventFragments.children || eventFragments.childNodes;
+            prevNode = children && children.length && children[counter-1]
+            if(prevNode && prevNode.className.indexOf('half') > -1){
+                if(prevNode.className.indexOf('right') > -1){
+                    li.className += " left";
+                }else{
+                    li.className += " right";
+                }
+
+            }
+
+            li.innerHTML = "<span class='event-name'>Sample Item</span><span class='event-location'>Sample Location</span>"
+            eventFragments.appendChild(li);
+        }
+
+        eventRanges.appendChild(eventFragments);
+    }
+
+    window.onload = layoutTimeSlots;
+
+</script>
+</body>
+</html>
